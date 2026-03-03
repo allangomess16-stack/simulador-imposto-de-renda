@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master IRPF 2026 | Fluxo de Gestão e Orçamento</title>
+    <title>Estrategista IRPF 2026 | Gestão de Orçamento</title>
     <style>
         :root {
             --bg-dark: #0b0f19; --card-bg: #151c2c; --primary: #3b82f6;
@@ -23,15 +23,14 @@
         
         .actions { display: flex; gap: 15px; margin: 30px 0; }
         .btn-calc { flex: 3; padding: 18px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
-        .btn-clear { flex: 1; padding: 18px; background: transparent; color: var(--text-dim); border: 1px solid var(--border); border-radius: 8px; font-weight: 600; cursor: pointer; text-transform: uppercase; }
+        .btn-clear { flex: 1; padding: 18px; background: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-weight: 600; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        .btn-clear:hover { background: #ef4444; color: white; }
 
-        /* Painel de Resultados (Estilo Receita) */
         .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; display: none; }
         .comp-card { background: #1a2234; padding: 25px; border-radius: 12px; border: 1px solid var(--border); }
         .val-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 0.85rem; border-bottom: 1px solid #242f44; }
         .val-total { font-weight: bold; font-size: 1.3rem; color: var(--secondary); margin-top: 20px; padding-top: 10px; border-top: 2px solid #242f44; text-align: right; }
         
-        /* Painel de Planejamento (Sempre por Último) */
         .opt-panel { background: #1a2234; border: 1px solid var(--accent); padding: 25px; border-radius: 12px; margin-top: 30px; display: none; }
         .opt-header { color: var(--accent); font-weight: 800; font-size: 1rem; margin-bottom: 20px; text-transform: uppercase; }
         .opt-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
@@ -75,7 +74,7 @@
 
     <div class="actions">
         <button class="btn-calc" onclick="processar()">Analisar Comparativo</button>
-        <button class="btn-clear" onclick="limpar()">Limpar</button>
+        <button class="btn-clear" onclick="limparTudo()">Limpar Todos os Campos</button>
     </div>
 
     <div id="resContainer" class="comparison-grid">
@@ -97,7 +96,6 @@
             </thead>
             <tbody id="optBody"></tbody>
         </table>
-        <p style="font-size: 0.7rem; color: var(--text-dim); margin-top:10px;">*Dados projetados com base na alíquota efetiva de 27,5%.</p>
     </div>
 </div>
 
@@ -146,11 +144,9 @@
 
         let saudeDepTotal = 0, eduDepEfetivaTotal = 0, optHtml = "";
 
-        // Otimização Titular
         let sobraTit = Math.max(0, TETO_EDU - eduTitReal);
         optHtml += `<tr><td>Titular</td><td>${fmt(sobraTit)}</td><td class="val-mensal">${fmt(sobraTit/12)}</td><td>${fmt(sobraTit * 0.275)}</td></tr>`;
 
-        // Dependentes
         document.querySelectorAll('.dep-item').forEach((item, idx) => {
             let s = parseBr(item.querySelector('.dep-saude').value);
             let e = parseBr(item.querySelector('.dep-edu').value);
@@ -160,10 +156,8 @@
             optHtml += `<tr><td>Dependente 0${idx+1}</td><td>${fmt(sobra)}</td><td class="val-mensal">${fmt(sobra/12)}</td><td>${fmt(sobra * 0.275)}</td></tr>`;
         });
 
-        const dedDepFixoTotal = depCount * DED_DEP_FIXO;
-        const totalDeducoes = inss + saudeTit + saudeDepTotal + eduTitEfetiva + eduDepEfetivaTotal + dedDepFixoTotal;
+        const totalDeducoes = inss + saudeTit + saudeDepTotal + eduTitEfetiva + eduDepEfetivaTotal + (depCount * DED_DEP_FIXO);
         
-        // 1. DEDUÇÕES LEGAIS (COMPLETO)
         const baseC = Math.max(0, renda - totalDeducoes);
         const faixaC = obterFaixa(baseC);
         const impDevidoC = (baseC * faixaC.aliq) - faixaC.ded;
@@ -173,21 +167,16 @@
             <div class="val-row"><span>Total Deduções:</span><span>${fmt(totalDeducoes)}</span></div>
             <div class="val-row" style="background:rgba(59,130,246,0.1)"><span>Base de Cálculo:</span><span style="font-weight:bold">${fmt(baseC)}</span></div>
             <div class="val-row"><span>Alíquota Aplicada:</span><span>${(faixaC.aliq*100).toFixed(1)}%</span></div>
-            <div class="val-row"><span>Parcela a Deduzir:</span><span>${fmt(faixaC.ded)}</span></div>
             <div class="val-total">Restituição: ${fmt(irrf - Math.max(0, impDevidoC))}</div>
         `;
 
-        // 2. DESCONTO SIMPLIFICADO
         const descS = Math.min(renda * 0.20, 16754.34);
         const baseS = Math.max(0, renda - descS);
         const faixaS = obterFaixa(baseS);
         const impDevidoS = (baseS * faixaS.aliq) - faixaS.ded;
 
         document.getElementById('detalheSimplificado').innerHTML = `
-            <div class="val-row"><span>Rendimentos Totais:</span><span>${fmt(renda)}</span></div>
-            <div class="val-row"><span>Desconto Padrão (20%):</span><span>${fmt(descS)}</span></div>
-            <div class="val-row" style="background:rgba(59,130,246,0.1)"><span>Base de Cálculo:</span><span style="font-weight:bold">${fmt(baseS)}</span></div>
-            <div class="val-row"><span>Alíquota Aplicada:</span><span>${(faixaS.aliq*100).toFixed(1)}%</span></div>
+            <div class="val-row"><span>Base de Cálculo:</span><span>${fmt(baseS)}</span></div>
             <div class="val-total">Restituição: ${fmt(irrf - Math.max(0, impDevidoS))}</div>
         `;
 
@@ -196,7 +185,26 @@
         document.getElementById('optPanel').style.display = 'block';
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
-    function limpar() { location.reload(); }
+
+    // NOVA FUNÇÃO DE LIMPEZA REAL
+    function limparTudo() {
+        // Limpa todos os inputs de texto
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.value = "";
+        });
+
+        // Remove todos os dependentes adicionados
+        document.getElementById('depContainer').innerHTML = "";
+        depCount = 0;
+
+        // Esconde os painéis de resultado
+        document.getElementById('resContainer').style.display = 'none';
+        document.getElementById('optPanel').style.display = 'none';
+
+        // Volta para o topo
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 </script>
 </body>
 </html>
