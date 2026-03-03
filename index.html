@@ -44,17 +44,18 @@
         .positive-badge { background: var(--soft-green); color: #34d399; }
         .negative-badge { background: var(--soft-red); color: #f87171; }
         
-        .val-total-box { margin-top: 20px; padding-top: 10px; border-top: 2px solid #242f44; text-align: right; }
+        .status-tag { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
+        .tag-low { background: rgba(245, 158, 11, 0.2); color: var(--accent); }
+        .tag-high { background: rgba(16, 185, 129, 0.2); color: var(--secondary); }
 
         .cenarios-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 30px; display: none; }
         @media (min-width: 768px) { .cenarios-grid { grid-template-columns: repeat(3, 1fr); } }
         .cenario-card { background: rgba(30, 41, 59, 0.2); border: 1px solid var(--border); padding: 20px; border-radius: 12px; }
         .cenario-title { font-size: 0.75rem; font-weight: 800; margin-bottom: 10px; text-transform: uppercase; }
-        .cenario-desc { font-size: 0.7rem; color: var(--text-dim); margin-bottom: 12px; line-height: 1.4; }
 
         .opt-panel { background: #1a2234; border: 1px solid var(--border); padding: 25px; border-radius: 12px; margin-top: 30px; display: none; }
         .table-responsive { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #242f44; font-size: 0.85rem; }
 
         .disclaimer { margin-top: 40px; padding: 20px; border-top: 1px solid var(--border); font-size: 0.65rem; color: var(--text-dim); text-align: justify; line-height: 1.4; }
@@ -67,12 +68,12 @@
     
     <div class="grid-main">
         <div class="card">
-            <span class="card-h">📈 Informe Plansul</span>
+            <span class="card-h">📈 Informe Oficial</span>
             <label>Rendimentos (Linha 01)</label>
             <input type="text" id="renda" class="money" value="82.754,99">
-            <label>INSS Oficial (Linha 02)</label>
+            <label>INSS (Linha 02)</label>
             <input type="text" id="inss" class="money" value="9.309,88">
-            <label>IRRF Retido (Linha 05)</label>
+            <label>IRRF (Linha 05)</label>
             <input type="text" id="irrf" class="money" value="8.247,52">
             <label>PGBL (Investimento)</label>
             <input type="text" id="pgbl" class="money" placeholder="0,00">
@@ -99,8 +100,8 @@
     </div>
 
     <div id="explicacao" class="info-box">
-        <strong>🔒 Nota de Privacidade:</strong> Dados processados localmente. <br>
-        <strong>🧐 Inteligência Fiscal:</strong> Renda de <span id="txtRenda"></span> gera alíquota de 27,5%. 
+        <strong>🔒 Nota de Privacidade:</strong> Seus dados não saem deste navegador. <br>
+        <strong>🧐 Inteligência Fiscal:</strong> Renda de <span id="txtRenda"></span> gera alíquota de 27,5%. Cada real investido corretamente reduz sua "fatura" com o governo.
     </div>
 
     <div id="resContainer" class="comparison-grid">
@@ -117,26 +118,32 @@
     <div id="cenariosContainer" class="cenarios-grid">
         <div class="cenario-card">
             <div class="cenario-title" style="color:var(--danger)">📉 Risco de Perda</div>
-            <div class="cenario-desc">O que acontece se você perder recibos ou esquecer de declarar R$ 5.000 em gastos.</div>
             <div id="cenarioMenos"></div>
         </div>
         <div class="cenario-card">
             <div class="cenario-title" style="color:var(--secondary)">🎓 Eficiência Familiar</div>
-            <div class="cenario-desc">Resultado caso você utilize 100% do teto de educação para todos os CPFs.</div>
             <div id="cenarioMais"></div>
         </div>
         <div class="cenario-card">
             <div class="cenario-title" style="color:var(--primary)">🏦 Estratégia PGBL</div>
-            <div class="cenario-desc">Potencial de restituição ao investir o limite de 12% em Previdência Privada.</div>
             <div id="cenarioPGBL"></div>
         </div>
     </div>
 
     <div id="optPanel" class="opt-panel">
-        <div style="color:var(--accent); font-weight:800; font-size:0.9rem; margin-bottom:15px; text-transform:uppercase;">📊 Detalhamento de Sobras por CPF</div>
+        <div style="color:var(--accent); font-weight:800; font-size:0.9rem; margin-bottom:15px; text-transform:uppercase;">📊 Guia de Otimização Mensal por CPF</div>
         <div class="table-responsive">
             <table>
-                <thead><tr><th>Beneficiário</th><th>Sobra Anual</th><th>Investimento Mensal</th><th>Ganho na Restituição</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>CPF</th>
+                        <th>Status</th>
+                        <th>Sobra Educação Anual</th>
+                        <th>Aporte Mensal Sugerido</th>
+                        <th>Ganho na Restituição</th>
+                        <th>Onde Aplicar?</th>
+                    </tr>
+                </thead>
                 <tbody id="optBody"></tbody>
             </table>
         </div>
@@ -175,8 +182,7 @@
     
     function renderBadge(val) {
         const badgeClass = val >= 0 ? "positive-badge" : "negative-badge";
-        const label = val >= 0 ? "Restituição" : "Imposto a Pagar";
-        return `<div class="val-total-box"><span style="font-size:0.7rem;color:var(--text-dim);display:block">${label}</span><span class="res-badge ${badgeClass}">${fmt(Math.abs(val))}</span></div>`;
+        return `<div class="val-total-box"><span class="res-badge ${badgeClass}">${fmt(Math.abs(val))}</span></div>`;
     }
 
     function calcularIR(base) {
@@ -196,43 +202,60 @@
         const eduTit = parseBr(document.getElementById('eduTit').value);
 
         let saudeD = 0, eduD = 0, optHtml = "";
-        let sTit = Math.max(0, TETO_EDU - eduTit);
-        optHtml += `<tr><td>Titular</td><td>${fmt(sTit)}</td><td>${fmt(sTit/12)}</td><td>${fmt(sTit * 0.275)}</td></tr>`;
+        
+        // Função para gerar linha da tabela didática
+        function gerarLinhaTabela(nome, valorGasto) {
+            let sobra = Math.max(0, TETO_EDU - valorGasto);
+            let mensal = sobra / 12;
+            let status = sobra > 0 ? `<span class="status-tag tag-low">Oportunidade</span>` : `<span class="status-tag tag-high">Otimizado</span>`;
+            let sugestao = sobra > 0 ? "Pós, Idiomas, Escolas" : "Teto atingido ✅";
+            
+            return `<tr>
+                <td><strong>${nome}</strong></td>
+                <td>${status}</td>
+                <td>${fmt(sobra)}</td>
+                <td style="color:var(--primary); font-weight:bold;">${fmt(mensal)}</td>
+                <td style="color:var(--secondary); font-weight:bold;">${fmt(sobra * 0.275)}</td>
+                <td style="font-size: 0.75rem; color: var(--text-dim);">${sugestao}</td>
+            </tr>`;
+        }
+
+        optHtml += gerarLinhaTabela("Titular", eduTit);
 
         document.querySelectorAll('.dep-item').forEach((item, idx) => {
             let s = parseBr(item.querySelector('.dep-saude').value), e = parseBr(item.querySelector('.dep-edu').value);
             saudeD += s; eduD += Math.min(e, TETO_EDU);
-            let sobra = Math.max(0, TETO_EDU - e);
-            optHtml += `<tr><td>Dep 0${idx+1}</td><td>${fmt(sobra)}</td><td>${fmt(sobra/12)}</td><td>${fmt(sobra * 0.275)}</td></tr>`;
+            optHtml += gerarLinhaTabela(`Dependente 0${idx+1}`, e);
         });
 
-        // CALCULO COMPLETO
         const totalD = inss + pgbl + saudeTit + saudeD + Math.min(eduTit, TETO_EDU) + eduD + (depCount * DED_DEP_FIXO);
         const baseC = Math.max(0, renda - totalD);
         const impC = calcularIR(baseC);
+        const aliqEfetivaC = renda > 0 ? (impC / renda) * 100 : 0;
         
+        // Modelo Completo
         document.getElementById('detalheCompleto').innerHTML = `
-            <div class="val-row"><span>Rendimento Tributável:</span><span>${fmt(renda)}</span></div>
-            <div class="val-row"><span>Total de Deduções:</span><span>${fmt(totalD)}</span></div>
+            <div class="val-row"><span>Rendimento Bruto:</span><span>${fmt(renda)}</span></div>
+            <div class="val-row"><span>Total Deduções:</span><span>${fmt(totalD)}</span></div>
             <div class="val-row highlight"><span>Base de Cálculo:</span><span>${fmt(baseC)}</span></div>
-            <div class="val-row"><span>Imposto Retido (Fonte):</span><span>${fmt(irrf)}</span></div>
+            <div class="val-row"><span>Alíquota Efetiva:</span><span>${aliqEfetivaC.toFixed(2)}%</span></div>
             ${renderBadge(irrf - Math.max(0, impC))}
         `;
 
-        // CALCULO SIMPLIFICADO
+        // Modelo Simplificado
         const descS = Math.min(renda * 0.20, 16754.34);
         const baseS = Math.max(0, renda - descS);
         const impS = calcularIR(baseS);
+        const aliqEfetivaS = renda > 0 ? (impS / renda) * 100 : 0;
 
         document.getElementById('detalheSimplificado').innerHTML = `
-            <div class="val-row"><span>Rendimento Tributável:</span><span>${fmt(renda)}</span></div>
-            <div class="val-row"><span>Desconto Padrão (20%):</span><span>${fmt(descS)}</span></div>
+            <div class="val-row"><span>Rendimento Bruto:</span><span>${fmt(renda)}</span></div>
+            <div class="val-row"><span>Desconto 20%:</span><span>${fmt(descS)}</span></div>
             <div class="val-row highlight"><span>Base de Cálculo:</span><span>${fmt(baseS)}</span></div>
-            <div class="val-row"><span>Imposto Retido (Fonte):</span><span>${fmt(irrf)}</span></div>
+            <div class="val-row"><span>Alíquota Efetiva:</span><span>${aliqEfetivaS.toFixed(2)}%</span></div>
             ${renderBadge(irrf - Math.max(0, impS))}
         `;
 
-        // CENARIOS E INTERFACE
         document.getElementById('txtRenda').innerText = fmt(renda);
         document.getElementById('explicacao').style.display = 'block';
         document.getElementById('resContainer').style.display = 'grid';
