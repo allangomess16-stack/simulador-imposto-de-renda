@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Estrategista IRPF 2026 | Gestão de Riqueza</title>
+    <title>Estrategista IRPF 2026 | Consultoria Fiscal</title>
     <style>
         :root {
             --bg-dark: #0b0f19; --card-bg: #151c2c; --primary: #3b82f6;
@@ -15,7 +15,7 @@
         .wrapper { max-width: 1200px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow-x: hidden; }
         
         .grid-main { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        @media (min-width: 768px) { .grid-main { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); } }
+        @media (min-width: 768px) { .grid-main { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); } }
 
         .card { padding: 20px; border-radius: 12px; background: rgba(30, 41, 59, 0.3); border: 1px solid var(--border); }
         .card-h { font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 15px; display: block; font-size: 0.8rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
@@ -29,7 +29,8 @@
         .btn-calc { flex: 3; padding: 18px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
         .btn-clear { flex: 1; padding: 18px; background: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-weight: 600; cursor: pointer; text-transform: uppercase; }
 
-        .info-box { background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--primary); padding: 15px; margin-top: 20px; font-size: 0.85rem; display: none; }
+        /* Painéis de Resultado e Explicação */
+        .info-box { background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--primary); padding: 15px; margin-top: 20px; font-size: 0.85rem; line-height: 1.5; display: none; }
         .comparison-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 25px; display: none; }
         @media (min-width: 768px) { .comparison-grid { grid-template-columns: 1fr 1fr; } }
         
@@ -37,9 +38,12 @@
         .val-row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 0.85rem; border-bottom: 1px solid #242f44; }
         .val-total { font-weight: bold; font-size: 1.3rem; color: var(--secondary); margin-top: 20px; padding-top: 10px; border-top: 2px solid #242f44; text-align: right; }
         
+        .desc-text { font-size: 0.75rem; color: var(--text-dim); margin-top: 5px; font-style: italic; }
+
+        /* Painel de Cenários */
         .cenarios-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 30px; display: none; }
-        @media (min-width: 768px) { .cenarios-grid { grid-template-columns: repeat(3, 1fr); } }
-        .cenario-card { background: rgba(245, 158, 11, 0.05); border: 1px dashed var(--accent); padding: 15px; border-radius: 12px; }
+        @media (min-width: 768px) { .cenarios-grid { grid-template-columns: 1fr 1fr; } }
+        .cenario-card { background: rgba(245, 158, 11, 0.05); border: 1px dashed var(--accent); padding: 20px; border-radius: 12px; }
     </style>
 </head>
 <body>
@@ -49,22 +53,20 @@
     
     <div class="grid-main">
         <div class="card">
-            <span class="card-h">📈 Informe Plansul</span>
-            <label>Rendimentos Brutos</label>
+            <span class="card-h">📈 Dados do Informe</span>
+            <label>Rendimentos (Linha 01)</label>
             <input type="text" id="renda" value="82.754,99">
-            <label>INSS Oficial</label>
+            <label>INSS (Linha 02)</label>
             <input type="text" id="inss" value="9.309,88">
-            <label>Imposto Retido (IRRF)</label>
+            <label>IRRF (Linha 05)</label>
             <input type="text" id="irrf" value="8.247,52">
         </div>
 
         <div class="card">
-            <span class="card-h">💰 Investimentos e Saúde</span>
-            <label>Aporte PGBL Atual</label>
-            <input type="text" id="pgbl" placeholder="0,00">
-            <label>Saúde Anual (Titular)</label>
+            <span class="card-h">👤 Titular</span>
+            <label>Saúde Anual</label>
             <input type="text" id="saudeTit" placeholder="0,00">
-            <label>Educação (Titular)</label>
+            <label>Educação Anual</label>
             <input type="text" id="eduTit" placeholder="0,00">
         </div>
 
@@ -76,41 +78,40 @@
     </div>
 
     <div class="actions">
-        <button class="btn-calc" onclick="processar()">Analisar Planejamento</button>
+        <button class="btn-calc" onclick="processar()">Analisar Inteligência Fiscal</button>
         <button class="btn-clear" onclick="limparTudo()">Limpar Tudo</button>
     </div>
 
     <div id="explicacao" class="info-box">
-        <strong>🧐 Inteligência de Investimentos:</strong><br>
-        Sua alíquota de 27,5% permite que o governo subsidie seus aportes. Ao investir em um fundo PGBL ou Educação, você retira esse dinheiro da "mão do governo" e o coloca no seu bolso através da restituição.
+        <strong>🧐 O que estamos analisando?</strong><br>
+        Com base na sua renda de <span id="txtRenda"></span>, sua alíquota é de 27,5%. Isso significa que para cada R$ 1.000,00 gastos em saúde ou educação (dentro do teto), o governo te devolve R$ 275,00. Estamos comparando se é melhor o desconto padrão de 20% ou detalhar cada gasto da sua família.
     </div>
 
     <div id="resContainer" class="comparison-grid">
         <div class="comp-card">
             <h3 style="color:var(--primary); font-size:0.9rem; margin-bottom:10px;">MODELO COMPLETO</h3>
             <div id="detalheCompleto"></div>
+            <p class="desc-text">*Ideal para quem tem dependentes e gastos altos com saúde/educação.</p>
         </div>
         <div class="comp-card">
             <h3 style="color:var(--primary); font-size:0.9rem; margin-bottom:10px;">MODELO SIMPLIFICADO</h3>
             <div id="detalheSimplificado"></div>
+            <p class="desc-text">*Aplica um desconto padrão de 20%, limitado a R$ 16.754,34.</p>
         </div>
     </div>
 
     <div id="cenariosContainer" class="cenarios-grid">
         <div class="cenario-card">
-            <h4 style="color:var(--accent); font-size:0.8rem; margin:0 0 10px 0;">📉 SEM PLANEJAMENTO</h4>
-            <p style="font-size:0.75rem; color:var(--text-dim);">Reduzindo R$ 5k em despesas:</p>
-            <div id="cenarioMenos" style="font-weight:bold; color:#ef4444;"></div>
+            <h4 style="color:var(--accent); margin:0 0 10px 0;">📉 Cenário: Redução de Gastos</h4>
+            <p style="font-size:0.8rem; color:var(--text-dim);">Se você remover R$ 5.000,00 de gastos com educação/saúde:</p>
+            <div id="cenarioMenos" style="font-weight:bold; font-size:1.1rem; color:#ef4444;"></div>
+            <p class="desc-text">Você "perde" a restituição sobre esses valores e paga mais imposto.</p>
         </div>
-        <div class="cenario-card" style="border-color:var(--secondary);">
-            <h4 style="color:var(--secondary); font-size:0.8rem; margin:0 0 10px 0;">🎓 EFICIÊNCIA FAMILIAR</h4>
-            <p style="font-size:0.75rem; color:var(--text-dim);">Usando 100% do teto de Educação:</p>
-            <div id="cenarioMais" style="font-weight:bold; color:var(--secondary);"></div>
-        </div>
-        <div class="cenario-card" style="border-color:var(--primary);">
-            <h4 style="color:var(--primary); font-size:0.8rem; margin:0 0 10px 0;">🏦 PERFIL INVESTIDOR</h4>
-            <p style="font-size:0.75rem; color:var(--text-dim);">Aportando 12% em PGBL:</p>
-            <div id="cenarioPGBL" style="font-weight:bold; color:var(--primary);"></div>
+        <div class="cenario-card" style="border-color:var(--secondary); background:rgba(16, 185, 129, 0.05);">
+            <h4 style="color:var(--secondary); margin:0 0 10px 0;">🚀 Cenário: Investimento Máximo</h4>
+            <p style="font-size:0.8rem; color:var(--text-dim);">Se você aproveitar o teto de educação de todos os dependentes:</p>
+            <div id="cenarioMais" style="font-weight:bold; font-size:1.1rem; color:var(--secondary);"></div>
+            <p class="desc-text">O governo subsidia seus gastos familiares devolvendo dinheiro no seu bolso.</p>
         </div>
     </div>
 </div>
@@ -124,50 +125,80 @@
         depCount++;
         const div = document.createElement('div');
         div.className = 'dep-item';
-        div.innerHTML = `<div style="margin: 10px 0;"><label>Dep 0${depCount} Saúde/Edu</label><input type="text" class="dep-saude" placeholder="Saúde"><input type="text" class="dep-edu" placeholder="Educação"></div>`;
+        div.innerHTML = `
+            <div style="font-size: 0.7rem; color: var(--primary); font-weight: bold; margin: 10px 0 5px 0;">DEPENDENTE 0${depCount}</div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div><label>Saúde</label><input type="text" class="dep-saude" placeholder="0,00"></div>
+                <div><label>Educação</label><input type="text" class="dep-edu" placeholder="0,00"></div>
+            </div>
+        `;
         document.getElementById('depContainer').appendChild(div);
     }
 
-    function parseBr(val) { return parseFloat(val.toString().replace(/[R$\s]/g, '').replace(/\./g, '').replace(',', '.')) || 0; }
+    function parseBr(val) {
+        if (!val) return 0;
+        let clean = val.toString().replace(/[R$\s]/g, '').replace(/\./g, '').replace(',', '.');
+        return parseFloat(clean) || 0;
+    }
+
     function fmt(v) { return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
-    function calcularIR(base) {
-        if (base <= 28467.20) return 0;
-        if (base <= 33919.80) return (base * 0.075) - 2135.04;
-        if (base <= 45012.60) return (base * 0.15) - 4679.03;
-        if (base <= 55976.16) return (base * 0.225) - 8054.98;
-        return (base * 0.275) - 10853.79;
+
+    function obterFaixa(base) {
+        if (base <= 28467.20) return { aliq: 0, ded: 0 };
+        if (base <= 33919.80) return { aliq: 0.075, ded: 2135.04 };
+        if (base <= 45012.60) return { aliq: 0.15, ded: 4679.03 };
+        if (base <= 55976.16) return { aliq: 0.225, ded: 8054.98 };
+        return { aliq: 0.275, ded: 10853.79 };
     }
 
     function processar() {
         const renda = parseBr(document.getElementById('renda').value);
         const inss = parseBr(document.getElementById('inss').value);
         const irrf = parseBr(document.getElementById('irrf').value);
-        const pgbl = parseBr(document.getElementById('pgbl').value);
         const saudeTit = parseBr(document.getElementById('saudeTit').value);
         const eduTit = Math.min(parseBr(document.getElementById('eduTit').value), TETO_EDU);
 
-        let saudeD = 0, eduD = 0;
-        document.querySelectorAll('.dep-saude').forEach(i => saudeD += parseBr(i.value));
-        document.querySelectorAll('.dep-edu').forEach(i => eduD += Math.min(parseBr(i.value), TETO_EDU));
+        let saudeDep = 0, eduDep = 0;
+        document.querySelectorAll('.dep-saude').forEach(i => saudeDep += parseBr(i.value));
+        document.querySelectorAll('.dep-edu').forEach(i => eduDep += Math.min(parseBr(i.value), TETO_EDU));
 
-        const totalD = inss + pgbl + saudeTit + saudeD + eduTit + eduD + (depCount * DED_DEP_FIXO);
-        const restC = irrf - Math.max(0, calcularIR(renda - totalD));
+        const totalDed = inss + saudeTit + saudeDep + eduTit + eduDep + (depCount * DED_DEP_FIXO);
+        
+        // Resultados Atuais
+        const impC = (renda - totalDed) * obterFaixa(renda - totalDed).aliq - obterFaixa(renda - totalDed).ded;
+        const restC = irrf - Math.max(0, impC);
 
-        // CENÁRIOS
-        const restMenos = irrf - Math.max(0, calcularIR(renda - (totalD - 5000)));
-        const restMais = irrf - Math.max(0, calcularIR(renda - (inss + pgbl + saudeTit + saudeD + ((depCount+1)*TETO_EDU) + (depCount*DED_DEP_FIXO))));
-        const restPGBL = irrf - Math.max(0, calcularIR(renda - (totalD + (renda * 0.12) - pgbl)));
+        // Cenário - (Gastos Reduzidos)
+        const restMenos = irrf - Math.max(0, ((renda - (totalDed - 5000)) * obterFaixa(renda - (totalDed - 5000)).aliq - obterFaixa(renda - (totalDed - 5000)).ded));
 
+        // Cenário + (Gastos Otimizados)
+        const tetoMaxEdu = (depCount + 1) * TETO_EDU;
+        const restMais = irrf - Math.max(0, ((renda - (inss + saudeTit + saudeDep + tetoMaxEdu + (depCount * DED_DEP_FIXO))) * obterFaixa(renda - (inss + saudeTit + saudeDep + tetoMaxEdu + (depCount * DED_DEP_FIXO))).aliq - obterFaixa(renda - (inss + saudeTit + saudeDep + tetoMaxEdu + (depCount * DED_DEP_FIXO))).ded));
+
+        // Renderização
+        document.getElementById('txtRenda').innerText = fmt(renda);
         document.getElementById('explicacao').style.display = 'block';
         document.getElementById('resContainer').style.display = 'grid';
         document.getElementById('cenariosContainer').style.display = 'grid';
+
+        document.getElementById('detalheCompleto').innerHTML = `
+            <div class="val-row"><span>Base de Cálculo:</span><span>${fmt(renda - totalDed)}</span></div>
+            <div class="val-total">Restituição: ${fmt(restC)}</div>
+        `;
         
-        document.getElementById('detalheCompleto').innerHTML = `<div class="val-total">Restituição: ${fmt(restC)}</div>`;
-        document.getElementById('cenarioMenos').innerText = fmt(restMenos);
-        document.getElementById('cenarioMais').innerText = fmt(Math.min(irrf, restMais));
-        document.getElementById('cenarioPGBL').innerText = fmt(Math.min(irrf, restPGBL));
+        const baseS = renda - Math.min(renda * 0.20, 16754.34);
+        const restS = irrf - Math.max(0, (baseS * obterFaixa(baseS).aliq - obterFaixa(baseS).ded));
+        document.getElementById('detalheSimplificado').innerHTML = `
+            <div class="val-row"><span>Base de Cálculo:</span><span>${fmt(baseS)}</span></div>
+            <div class="val-total">Restituição: ${fmt(restS)}</div>
+        `;
+
+        document.getElementById('cenarioMenos').innerText = `Restituição: ${fmt(restMenos)}`;
+        document.getElementById('cenarioMais').innerText = `Restituição: ${fmt(Math.min(irrf, restMais))}`;
+        
         window.scrollTo({ top: document.getElementById('explicacao').offsetTop, behavior: 'smooth' });
     }
+
     function limparTudo() { location.reload(); }
 </script>
 </body>
