@@ -24,7 +24,8 @@
         
         label { display: block; font-size: 0.7rem; color: var(--text-dim); margin-bottom: 4px; font-weight: 600; }
         input { width: 100%; padding: 12px; background: #0b0f19; border: 1px solid var(--border); border-radius: 8px; color: white; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; text-align: right; }
-        
+        .age-input { text-align: center; }
+
         .actions { display: flex; flex-direction: column; gap: 10px; margin: 25px 0; }
         @media (min-width: 600px) { .actions { flex-direction: row; } }
 
@@ -37,7 +38,7 @@
         @media (min-width: 768px) { .comparison-grid { grid-template-columns: 1fr 1fr; } }
         
         .comp-card { background: #1a2234; padding: 25px; border-radius: 12px; border: 1px solid var(--border); }
-        .val-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 0.85rem; border-bottom: 1px solid #242f44; }
+        .val-row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 0.85rem; border-bottom: 1px solid #242f44; }
         .val-row.highlight { background: rgba(59, 130, 246, 0.05); font-weight: 600; color: var(--primary); }
         
         .res-badge { padding: 8px 16px; border-radius: 6px; font-weight: 700; display: inline-block; margin-top: 10px; }
@@ -51,12 +52,17 @@
         .cenarios-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 30px; display: none; }
         @media (min-width: 768px) { .cenarios-grid { grid-template-columns: repeat(3, 1fr); } }
         .cenario-card { background: rgba(30, 41, 59, 0.2); border: 1px solid var(--border); padding: 20px; border-radius: 12px; }
-        .cenario-title { font-size: 0.75rem; font-weight: 800; margin-bottom: 10px; text-transform: uppercase; }
 
         .opt-panel { background: #1a2234; border: 1px solid var(--border); padding: 25px; border-radius: 12px; margin-top: 30px; display: none; }
         .table-responsive { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #242f44; font-size: 0.85rem; }
+
+        .strategy-box { background: rgba(245, 158, 11, 0.05); border: 1px solid var(--accent); padding: 20px; border-radius: 12px; margin-top: 30px; display: none; }
+        .strategy-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 15px; }
+        .strategy-item { background: rgba(11, 15, 25, 0.4); padding: 15px; border-radius: 8px; border-left: 3px solid var(--accent); }
+        .strategy-item h4 { margin: 0 0 8px 0; color: var(--accent); font-size: 0.85rem; }
+        .strategy-item p { margin: 0; font-size: 0.75rem; color: var(--text-dim); line-height: 1.4; }
 
         .disclaimer { margin-top: 40px; padding: 20px; border-top: 1px solid var(--border); font-size: 0.65rem; color: var(--text-dim); text-align: justify; line-height: 1.4; }
     </style>
@@ -81,6 +87,8 @@
 
         <div class="card">
             <span class="card-h">👤 Titular</span>
+            <label>Idade do Titular</label>
+            <input type="number" id="ageTit" class="age-input" placeholder="Anos">
             <label>Saúde Anual</label>
             <input type="text" id="saudeTit" class="money" placeholder="0,00">
             <label>Educação Anual</label>
@@ -90,7 +98,7 @@
         <div class="card">
             <span class="card-h">👥 Família</span>
             <div id="depContainer"></div>
-            <button class="btn-add" style="width:100%; padding:10px; cursor:pointer;" onclick="addDependente()">+ NOVO DEPENDENTE</button>
+            <button class="btn-add" style="width:100%; padding:10px; cursor:pointer;" onclick="addDependente()">+ ADICIONAR DEPENDENTE</button>
         </div>
     </div>
 
@@ -101,7 +109,7 @@
 
     <div id="explicacao" class="info-box">
         <strong>🔒 Nota de Privacidade:</strong> Seus dados não saem deste navegador. <br>
-        <strong>🧐 Inteligência Fiscal:</strong> Renda de <span id="txtRenda"></span> gera alíquota de 27,5%. Cada real investido corretamente reduz sua "fatura" com o governo.
+        <strong>🧐 Inteligência Fiscal:</strong> Renda de <span id="txtRenda"></span> gera alíquota de 27,5%. O governo "paga" parte do futuro da sua família via restituição.
     </div>
 
     <div id="resContainer" class="comparison-grid">
@@ -130,18 +138,23 @@
         </div>
     </div>
 
+    <div id="strategyPanel" class="strategy-box">
+        <div style="font-weight:800; font-size:0.9rem; text-transform:uppercase;">🎯 Estratégia Recomendada por Perfil</div>
+        <div class="strategy-grid" id="strategyGrid"></div>
+    </div>
+
     <div id="optPanel" class="opt-panel">
         <div style="color:var(--accent); font-weight:800; font-size:0.9rem; margin-bottom:15px; text-transform:uppercase;">📊 Guia de Otimização Mensal por CPF</div>
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
-                        <th>CPF</th>
+                        <th>CPF / Idade</th>
                         <th>Status</th>
                         <th>Sobra Educação Anual</th>
-                        <th>Aporte Mensal Sugerido</th>
+                        <th>Investimento Mensal</th>
                         <th>Ganho na Restituição</th>
-                        <th>Onde Aplicar?</th>
+                        <th>Recomendação de Investimento</th>
                     </tr>
                 </thead>
                 <tbody id="optBody"></tbody>
@@ -172,7 +185,15 @@
         depCount++;
         const div = document.createElement('div');
         div.className = 'dep-item';
-        div.innerHTML = `<div style="margin: 10px 0;"><label>Dep 0${depCount}</label><input type="text" class="money dep-saude" placeholder="Saúde"><input type="text" class="money dep-edu" placeholder="Educação"></div>`;
+        div.innerHTML = `
+            <div style="margin: 15px 0; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+                <div style="font-size: 0.7rem; color: var(--primary); font-weight: bold; margin-bottom: 8px;">DEPENDENTE 0${depCount}</div>
+                <div style="display:grid; grid-template-columns: 1fr 2fr 2fr; gap:10px;">
+                    <div><label>Idade</label><input type="number" class="age-input dep-age" placeholder="Anos"></div>
+                    <div><label>Saúde</label><input type="text" class="money dep-saude" placeholder="0,00"></div>
+                    <div><label>Educação</label><input type="text" class="money dep-edu" placeholder="0,00"></div>
+                </div>
+            </div>`;
         document.getElementById('depContainer').appendChild(div);
         div.querySelectorAll('.money').forEach(i => i.addEventListener('input', () => aplicarMascara(i)));
     }
@@ -183,6 +204,24 @@
     function renderBadge(val) {
         const badgeClass = val >= 0 ? "positive-badge" : "negative-badge";
         return `<div class="val-total-box"><span class="res-badge ${badgeClass}">${fmt(Math.abs(val))}</span></div>`;
+    }
+
+    function getRecomendacao(idade) {
+        if (!idade && idade !== 0) return "Cursos de Idiomas e Especialização";
+        if (idade <= 6) return "Creche, Pré-escola e Natação (Saúde)";
+        if (idade <= 17) return "Escola Particular, Idiomas e Esportes";
+        if (idade <= 24) return "Faculdade, Intercâmbio e Cursos Técnicos";
+        return "Pós-graduação, MBA e Cursos Profissionalizantes";
+    }
+
+    function getStrategyHTML(nome, idade) {
+        let titulo = "", desc = "";
+        if (idade <= 6) { titulo = `Primeira Infância (${nome})`; desc = "Foco em Creche e Nutrição. O governo abate 27,5% da mensalidade escolar até o teto."; }
+        else if (idade <= 17) { titulo = `Formação Básica (${nome})`; desc = "Momento de investir em Inglês e colégios de alto desempenho. O retorno fiscal ajuda a pagar a matrícula."; }
+        else if (idade <= 24) { titulo = `Ensino Superior (${nome})`; desc = "Faculdade e Pós-graduação. Verifique se o dependente ainda cumpre os requisitos legais de idade/estudo."; }
+        else { titulo = `Educação Continuada (${nome})`; desc = "Cursos profissionais e especializações. Excelente para manter a empregabilidade."; }
+        
+        return `<div class="strategy-item"><h4>${titulo}</h4><p>${desc}</p></div>`;
     }
 
     function calcularIR(base) {
@@ -200,32 +239,39 @@
         const pgbl = parseBr(document.getElementById('pgbl').value);
         const saudeTit = parseBr(document.getElementById('saudeTit').value);
         const eduTit = parseBr(document.getElementById('eduTit').value);
+        const ageTit = document.getElementById('ageTit').value;
 
-        let saudeD = 0, eduD = 0, optHtml = "";
+        let saudeD = 0, eduD = 0, optHtml = "", strategyHtml = "";
         
-        // Função para gerar linha da tabela didática
-        function gerarLinhaTabela(nome, valorGasto) {
-            let sobra = Math.max(0, TETO_EDU - valorGasto);
-            let mensal = sobra / 12;
-            let status = sobra > 0 ? `<span class="status-tag tag-low">Oportunidade</span>` : `<span class="status-tag tag-high">Otimizado</span>`;
-            let sugestao = sobra > 0 ? "Pós, Idiomas, Escolas" : "Teto atingido ✅";
-            
-            return `<tr>
-                <td><strong>${nome}</strong></td>
-                <td>${status}</td>
-                <td>${fmt(sobra)}</td>
-                <td style="color:var(--primary); font-weight:bold;">${fmt(mensal)}</td>
-                <td style="color:var(--secondary); font-weight:bold;">${fmt(sobra * 0.275)}</td>
-                <td style="font-size: 0.75rem; color: var(--text-dim);">${sugestao}</td>
-            </tr>`;
-        }
+        // Titular
+        let sTit = Math.max(0, TETO_EDU - eduTit);
+        strategyHtml += getStrategyHTML("Você", ageTit || 30);
+        optHtml += `<tr>
+            <td><strong>Titular (${ageTit || '--'} anos)</strong></td>
+            <td>${sTit > 0 ? `<span class="status-tag tag-low">Oportunidade</span>` : `<span class="status-tag tag-high">Otimizado</span>`}</td>
+            <td>${fmt(sTit)}</td>
+            <td style="color:var(--primary); font-weight:bold;">${fmt(sTit/12)}</td>
+            <td style="color:var(--secondary); font-weight:bold;">${fmt(sTit * 0.275)}</td>
+            <td>${getRecomendacao(ageTit)}</td>
+        </tr>`;
 
-        optHtml += gerarLinhaTabela("Titular", eduTit);
-
+        // Dependentes
         document.querySelectorAll('.dep-item').forEach((item, idx) => {
-            let s = parseBr(item.querySelector('.dep-saude').value), e = parseBr(item.querySelector('.dep-edu').value);
+            let s = parseBr(item.querySelector('.dep-saude').value);
+            let e = parseBr(item.querySelector('.dep-edu').value);
+            let age = item.querySelector('.dep-age').value;
             saudeD += s; eduD += Math.min(e, TETO_EDU);
-            optHtml += gerarLinhaTabela(`Dependente 0${idx+1}`, e);
+            let sobra = Math.max(0, TETO_EDU - e);
+            
+            strategyHtml += getStrategyHTML(`Dep 0${idx+1}`, age || 10);
+            optHtml += `<tr>
+                <td><strong>Dep 0${idx+1} (${age || '--'} anos)</strong></td>
+                <td>${sobra > 0 ? `<span class="status-tag tag-low">Oportunidade</span>` : `<span class="status-tag tag-high">Otimizado</span>`}</td>
+                <td>${fmt(sobra)}</td>
+                <td style="color:var(--primary); font-weight:bold;">${fmt(sobra/12)}</td>
+                <td style="color:var(--secondary); font-weight:bold;">${fmt(sobra * 0.275)}</td>
+                <td>${getRecomendacao(age)}</td>
+            </tr>`;
         });
 
         const totalD = inss + pgbl + saudeTit + saudeD + Math.min(eduTit, TETO_EDU) + eduD + (depCount * DED_DEP_FIXO);
@@ -233,7 +279,6 @@
         const impC = calcularIR(baseC);
         const aliqEfetivaC = renda > 0 ? (impC / renda) * 100 : 0;
         
-        // Modelo Completo
         document.getElementById('detalheCompleto').innerHTML = `
             <div class="val-row"><span>Rendimento Bruto:</span><span>${fmt(renda)}</span></div>
             <div class="val-row"><span>Total Deduções:</span><span>${fmt(totalD)}</span></div>
@@ -242,17 +287,11 @@
             ${renderBadge(irrf - Math.max(0, impC))}
         `;
 
-        // Modelo Simplificado
         const descS = Math.min(renda * 0.20, 16754.34);
         const baseS = Math.max(0, renda - descS);
         const impS = calcularIR(baseS);
-        const aliqEfetivaS = renda > 0 ? (impS / renda) * 100 : 0;
-
         document.getElementById('detalheSimplificado').innerHTML = `
-            <div class="val-row"><span>Rendimento Bruto:</span><span>${fmt(renda)}</span></div>
-            <div class="val-row"><span>Desconto 20%:</span><span>${fmt(descS)}</span></div>
-            <div class="val-row highlight"><span>Base de Cálculo:</span><span>${fmt(baseS)}</span></div>
-            <div class="val-row"><span>Alíquota Efetiva:</span><span>${aliqEfetivaS.toFixed(2)}%</span></div>
+            <div class="val-row"><span>Base de Cálculo:</span><span>${fmt(baseS)}</span></div>
             ${renderBadge(irrf - Math.max(0, impS))}
         `;
 
@@ -260,6 +299,8 @@
         document.getElementById('explicacao').style.display = 'block';
         document.getElementById('resContainer').style.display = 'grid';
         document.getElementById('cenariosContainer').style.display = 'grid';
+        document.getElementById('strategyPanel').style.display = 'block';
+        document.getElementById('strategyGrid').innerHTML = strategyHtml;
         document.getElementById('optPanel').style.display = 'block';
         document.getElementById('optBody').innerHTML = optHtml;
 
