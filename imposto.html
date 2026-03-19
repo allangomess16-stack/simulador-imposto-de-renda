@@ -1,20 +1,30 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Estrategista IRPF 2026/2027</title>
+    <title>Simulador IRPF 2026/2027 | Oficial</title>
     <style>
         :root {
             --bg-dark: #0b0f19; --card-bg: #151c2c; --primary: #3b82f6;
             --secondary: #10b981; --danger: #f87171; --text-main: #f1f5f9; 
             --text-dim: #94a3b8; --border: #2d3748; --accent: #f59e0b;
         }
+        
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; padding: 10px; overflow-x: hidden; }
         .wrapper { max-width: 1200px; margin: auto; background: var(--card-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
         
+        /* Tabela de Regras Visíveis */
+        .regras-vigentes { background: rgba(59, 130, 246, 0.1); border: 1px solid var(--primary); padding: 15px; margin-bottom: 20px; border-radius: 12px; }
+        .regras-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.75rem; margin-top: 10px; }
+        @media (min-width: 600px) { .regras-grid { grid-template-columns: repeat(3, 1fr); } }
+        .regra-item { background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; text-align: center; border: 1px solid var(--border); }
+        .regra-label { color: var(--text-dim); display: block; margin-bottom: 2px; }
+        .regra-val { color: var(--primary); font-weight: bold; }
+
+        /* Aviso de Isenção */
         #alertaIsento { 
             display: none; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--secondary); 
             color: var(--secondary); padding: 15px; border-radius: 12px; margin-bottom: 20px; 
@@ -36,6 +46,7 @@
         .btn-calc { flex: 3; padding: 18px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 1rem; }
         .btn-clear { flex: 1; padding: 18px; background: transparent; color: var(--danger); border: 1px solid var(--danger); border-radius: 8px; font-weight: 600; cursor: pointer; text-transform: uppercase; }
 
+        /* Resultados */
         .apuracao-container { background: #1a2234; padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-top: 25px; display: none; }
         .item-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #242f44; font-size: 0.85rem; }
         .destaque-row { background: rgba(59, 130, 246, 0.1); font-weight: 800; padding: 12px; border-radius: 6px; margin: 5px 0; }
@@ -46,63 +57,73 @@
 <body>
 
 <div class="wrapper">
-    <h1 style="text-align:center; font-size: 1.4rem; color: var(--primary); margin-bottom: 20px;">Estrategista IRPF 2025/2026</h1>
+    <h1>Estrategista IRPF 2026/2027</h1>
     
-    <div id="alertaIsento">✅ RENDIMENTOS ISENTOS: Você está abaixo do limite de obrigatoriedade (R$ 28.559,70).</div>
+    <div class="regras-vigentes">
+        <span style="font-size: 0.7rem; font-weight: bold; color: var(--primary); text-transform: uppercase;">📋 Regras de Cálculo (Exercício 2026)</span>
+        <div class="regras-grid">
+            <div class="regra-item"><span class="regra-label">Isenção</span><span class="regra-val">R$ 28.559,70</span></div>
+            <div class="regra-item"><span class="regra-label">Dep. Fixo</span><span class="regra-val">R$ 2.275,08</span></div>
+            <div class="regra-item"><span class="regra-label">Teto Edu.</span><span class="regra-val">R$ 3.561,50</span></div>
+        </div>
+    </div>
+
+    <div id="alertaIsento">
+        ✅ ISENÇÃO DETECTADA: Rendimentos abaixo de R$ 28.559,70. Declaração não obrigatória por renda.
+    </div>
 
     <div class="grid-main">
         <div class="card">
             <span class="card-h">1. Rendimentos</span>
-            <label>Rendimentos (Linha 01)</label>
-            <input type="text" id="renda" class="money" inputmode="numeric" value="82.754,99">
-            <label>INSS (Linha 02)</label>
-            <input type="text" id="inss" class="money" inputmode="numeric" value="9.309,88">
-            <label>IRRF (Linha 05)</label>
-            <input type="text" id="irrf" class="money" inputmode="numeric" value="8.247,52">
+            <label>Rendimentos Brutos (Total)</label>
+            <input type="text" id="renda" class="money" inputmode="numeric" placeholder="0,00">
+            <label>INSS Oficial</label>
+            <input type="text" id="inss" class="money" inputmode="numeric" placeholder="0,00">
+            <label>IRRF (Retido na Fonte)</label>
+            <input type="text" id="irrf" class="money" inputmode="numeric" placeholder="0,00">
             <label style="color:var(--accent)">Reajuste Salarial (%)</label>
             <input type="number" id="reajuste" inputmode="decimal" placeholder="0.0">
         </div>
 
         <div class="card">
-            <span class="card-h">2. Deduções Titular</span>
+            <span class="card-h">2. Deduções do Titular</span>
             <label>Saúde Titular</label>
             <input type="text" id="saudeTit" class="money" inputmode="numeric" placeholder="0,00">
             <label>Educação Titular</label>
             <input type="text" id="eduTit" class="money" inputmode="numeric" placeholder="0,00">
-            <label>5. Deduções de Incentivo</label>
+            <label>Incentivos Fiscais</label>
             <input type="text" id="incentivo" class="money" inputmode="numeric" placeholder="0,00">
         </div>
 
         <div class="card">
             <span class="card-h">3. Dependentes</span>
             <div id="depContainer"></div>
-            <button onclick="addDep()" style="width:100%; padding:12px; background:transparent; border:1px dashed var(--primary); color:var(--primary); border-radius:8px; cursor:pointer; font-weight: bold;">+ ADICIONAR DEPENDENTE</button>
+            <button onclick="addDep()" style="width:100%; padding:12px; background:transparent; border:1px dashed var(--primary); color:var(--primary); border-radius:8px; cursor:pointer;">+ ADICIONAR DEPENDENTE</button>
         </div>
     </div>
 
     <div class="actions">
-        <button class="btn-calc" onclick="processar()">CALCULAR IMPOSTO</button>
+        <button class="btn-calc" onclick="processar()">CALCULAR AGORA</button>
         <button class="btn-clear" onclick="limpar()">LIMPAR TUDO</button>
     </div>
 
     <div id="resBox" class="apuracao-container">
-        <div class="item-row"><span>1. Rendimentos Tributáveis</span><span id="v1"></span></div>
-        <div class="item-row destaque-row"><span>2. TOTAL DAS DEDUÇÕES</span><span id="v2"></span></div>
-        <div class="item-row"><span>3. Base de Cálculo (1 - 2)</span><span id="v3"></span></div>
-        <div class="item-row destaque-row"><span>4. Imposto Total Calculado</span><span id="v4" style="color:var(--accent)"></span></div>
-        <div class="item-row"><span>5. Deduções de Incentivo</span><span id="v5"></span></div>
-        <div class="item-row destaque-row"><span>6. IMPOSTO DEVIDO (4 - 5)</span><span id="v6"></span></div>
+        <div class="item-row"><span>1. Rendimentos</span><span id="v1"></span></div>
+        <div class="item-row destaque-row"><span>2. TOTAL DEDUÇÕES</span><span id="v2"></span></div>
+        <div class="item-row"><span>3. Base de Cálculo</span><span id="v3"></span></div>
+        <div class="item-row destaque-row"><span>4. Imposto Total</span><span id="v4" style="color:var(--accent)"></span></div>
+        <div class="item-row"><span>5. Incentivos</span><span id="v5"></span></div>
+        <div class="item-row destaque-row"><span>6. Imposto Devido</span><span id="v6"></span></div>
         <div class="item-row"><span>7. Alíquota Efetiva</span><span id="v7"></span></div>
         <div class="item-row destaque-row" style="color:var(--secondary); font-size:1.1rem; border:1px solid var(--secondary);">
-            <span id="labelF">8. IMPOSTO A RESTITUIR</span><span id="v8"></span>
+            <span id="labelF">8. RESTITUIÇÃO</span><span id="v8"></span>
         </div>
     </div>
 </div>
 
 <script>
     let depCount = 0;
-    const TETO_EDU = 3561.50;
-    const DED_DEP_FIXO = 2275.08;
+    const LIMITE_ANUAL = 28559.70;
 
     function parseBr(val) { return parseFloat(val.toString().replace(/\./g, '').replace(',', '.')) || 0; }
     function fmt(v) { return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
@@ -111,9 +132,8 @@
         depCount++;
         const div = document.createElement('div');
         div.className = 'dep-item-box';
-        div.innerHTML = `<strong>Dependente ${depCount}</strong>
-            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-top:5px;">
-                <div><label>Idade</label><input type="number" placeholder="0"></div>
+        div.innerHTML = `<strong>Dep ${depCount}</strong>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:5px;">
                 <div><label>Saúde</label><input type="text" class="money d-saude" inputmode="numeric" placeholder="0,00"></div>
                 <div><label>Educação</label><input type="text" class="money d-edu" inputmode="numeric" placeholder="0,00"></div>
             </div>`;
@@ -124,26 +144,29 @@
     function processar() {
         const reaj = 1 + (parseFloat(document.getElementById('reajuste').value) / 100 || 0);
         const renda = parseBr(document.getElementById('renda').value) * reaj;
+        
+        document.getElementById('alertaIsento').style.display = (renda > 0 && renda <= LIMITE_ANUAL) ? 'block' : 'none';
+
         const inss = parseBr(document.getElementById('inss').value) * reaj;
         const irrf = parseBr(document.getElementById('irrf').value) * reaj;
         const incentivo = parseBr(document.getElementById('incentivo').value);
 
         let saude = parseBr(document.getElementById('saudeTit').value);
-        let edu = Math.min(parseBr(document.getElementById('eduTit').value), TETO_EDU);
+        let edu = Math.min(parseBr(document.getElementById('eduTit').value), 3561.50);
 
         document.querySelectorAll('.d-saude').forEach(i => saude += parseBr(i.value));
-        document.querySelectorAll('.d-edu').forEach(i => edu += Math.min(parseBr(i.value), TETO_EDU));
+        document.querySelectorAll('.d-edu').forEach(i => edu += Math.min(parseBr(i.value), 3561.50));
 
-        const deducoes = inss + saude + edu + (depCount * DED_DEP_FIXO);
+        const deducoes = inss + saude + edu + (depCount * 2275.08);
         const base = Math.max(0, renda - deducoes);
 
-        // MOTOR DE CÁLCULO ATUALIZADO (ISENÇÃO R$ 28.559,70)
-        let f2 = base > 28559.70 ? Math.min(base - 28559.70, 5360.10) * 0.075 : 0;
-        let f3 = base > 33919.80 ? Math.min(base - 33919.80, 11092.80) * 0.15 : 0;
-        let f4 = base > 45012.60 ? Math.min(base - 45012.60, 10963.56) * 0.225 : 0;
-        let f5 = base > 55976.16 ? (base - 55976.16) * 0.275 : 0;
-        
-        let impostoTotal = f2 + f3 + f4 + f5;
+        // MOTOR DE CÁLCULO CASCATA (FAIXAS OFICIAIS)
+        let i2 = base > 28559.70 ? Math.min(base - 28559.70, 5360.10) * 0.075 : 0;
+        let i3 = base > 33919.80 ? Math.min(base - 33919.80, 11092.80) * 0.15 : 0;
+        let i4 = base > 45012.60 ? Math.min(base - 45012.60, 10963.56) * 0.225 : 0;
+        let i5 = base > 55976.16 ? (base - 55976.16) * 0.275 : 0;
+        let impostoTotal = i2 + i3 + i4 + i5;
+
         const devido = Math.max(0, impostoTotal - incentivo);
         const resultado = irrf - devido;
 
@@ -155,9 +178,8 @@
         document.getElementById('v6').innerText = fmt(devido);
         document.getElementById('v7').innerText = ((devido / renda) * 100).toFixed(2) + "%";
         document.getElementById('v8').innerText = fmt(Math.abs(resultado));
-        document.getElementById('labelF').innerText = resultado >= 0 ? "8. IMPOSTO A RESTITUIR" : "8. IMPOSTO A PAGAR";
+        document.getElementById('labelF').innerText = resultado >= 0 ? "8. RESTITUIÇÃO" : "8. IMPOSTO A PAGAR";
 
-        document.getElementById('alertaIsento').style.display = (renda > 0 && renda <= 28559.70) ? 'block' : 'none';
         document.getElementById('resBox').style.display = 'block';
         window.scrollTo({ top: document.getElementById('resBox').offsetTop - 20, behavior: 'smooth' });
     }
@@ -172,10 +194,11 @@
         document.querySelectorAll('input').forEach(i => i.value = '');
         document.getElementById('depContainer').innerHTML = '';
         document.getElementById('resBox').style.display = 'none';
+        document.getElementById('alertaIsento').style.display = 'none';
         depCount = 0;
     }
+    
     document.querySelectorAll('.money').forEach(i => i.addEventListener('input', e => aplicarMascara(e.target)));
 </script>
 </body>
 </html>
-
