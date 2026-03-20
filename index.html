@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Simulador IRPF 2026 | Ano-Base 2025</title>
+    <title>Estrategista IRPF 2026 | Gestão Fiscal</title>
     <style>
         :root {
             --bg-dark: #0b0f19; --card-bg: #151c2c; --primary: #3b82f6;
@@ -38,7 +38,6 @@
         .regra-label { color: var(--text-dim); display: block; margin-bottom: 2px; }
         .regra-val { color: var(--primary); font-weight: bold; }
 
-        /* Estilo do Alerta Ajustado */
         #alertaIsento { 
             display: none; 
             background: rgba(16, 185, 129, 0.15); 
@@ -69,7 +68,6 @@
         .btn-calc { flex: 3; padding: 18px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
         .btn-clear { flex: 1; padding: 18px; background: transparent; color: var(--danger); border: 1px solid var(--danger); border-radius: 8px; font-weight: 600; cursor: pointer; text-transform: uppercase; }
 
-        /* Container de Resultados */
         #sectionResultados { display: none; margin-top: 25px; }
         .apuracao-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
         @media (min-width: 950px) { .apuracao-grid { grid-template-columns: 1fr 1fr; } }
@@ -108,12 +106,14 @@
     <div class="grid-main">
         <div class="card">
             <span class="card-h">📈 Rendimentos Tributáveis</span>
-            <label>Rendimentos Tributáveis (Anual)</label>
-            <input type="text" id="renda" class="money" inputmode="numeric" placeholder="0,00">
+            <label>Rendimentos Principais (Salário/Pró-labore)</label>
+            <input type="text" id="renda" class="money" inputmode="numeric" value="82.754,99">
+            <label style="color:var(--accent)">Rendimentos Extras (Bônus/Outros)</label>
+            <input type="text" id="rendaExtra" class="money" inputmode="numeric" placeholder="0,00">
             <label>Previdência Oficial (INSS)</label>
-            <input type="text" id="inss" class="money" inputmode="numeric" placeholder="0,00">
+            <input type="text" id="inss" class="money" inputmode="numeric" value="9.309,88">
             <label>Imposto Retido (IRRF)</label>
-            <input type="text" id="irrf" class="money" inputmode="numeric" placeholder="0,00">
+            <input type="text" id="irrf" class="money" inputmode="numeric" value="8.247,52">
         </div>
 
         <div class="card">
@@ -145,7 +145,7 @@
         <div id="resBox" class="apuracao-grid">
             <div class="res-container">
                 <div class="res-header">📘 Deduções Legais (Completo)</div>
-                <div class="item-row"><span>Rendimentos</span><span id="c1"></span></div>
+                <div class="item-row"><span>Rendimentos Totais</span><span id="c1"></span></div>
                 <div class="item-row"><span>Deduções</span><span id="c2"></span></div>
                 <div class="item-row destaque-row"><span>Base de Cálculo</span><span id="c3"></span></div>
                 <div class="table-responsive">
@@ -160,7 +160,7 @@
 
             <div class="res-container">
                 <div class="res-header">📗 Desconto Padrão (Simplificado)</div>
-                <div class="item-row"><span>Rendimentos</span><span id="s1"></span></div>
+                <div class="item-row"><span>Rendimentos Totais</span><span id="s1"></span></div>
                 <div class="item-row"><span>Desconto 20%</span><span id="s2"></span></div>
                 <div class="item-row destaque-row"><span>Base de Cálculo</span><span id="s3"></span></div>
                 <div class="table-responsive">
@@ -210,7 +210,11 @@
     }
 
     function processar() {
-        const renda = parse(document.getElementById('renda').value);
+        // Soma as duas fontes de renda antes de iniciar o cálculo
+        const rendaPrincipal = parse(document.getElementById('renda').value);
+        const rendaExtra = parse(document.getElementById('rendaExtra').value);
+        const rendaTotal = rendaPrincipal + rendaExtra;
+
         const inss = parse(document.getElementById('inss').value);
         const irrf = parse(document.getElementById('irrf').value);
         const inc = parse(document.getElementById('incentivo').value);
@@ -221,12 +225,12 @@
         document.querySelectorAll('.d-saude').forEach(i => saude += parse(i.value));
         document.querySelectorAll('.d-edu').forEach(i => edu += Math.min(parse(i.value), 3561.50));
         const dedC = inss + saude + edu + (depCount * 2275.08);
-        const baseC = Math.max(0, renda - dedC);
+        const baseC = Math.max(0, rendaTotal - dedC);
         const resC = calcMotor(baseC);
 
         // SIMPLIFICADA
-        const descS = Math.min(renda * 0.2, 16754.34);
-        const baseS = Math.max(0, renda - descS);
+        const descS = Math.min(rendaTotal * 0.2, 16754.34);
+        const baseS = Math.max(0, rendaTotal - descS);
         const resS = calcMotor(baseS);
 
         const fill = (p, r, d, b, res) => {
@@ -242,10 +246,9 @@
             document.getElementById(p+'L').innerText = saldo >= 0 ? 'RESTITUIÇÃO' : 'A PAGAR';
         }
 
-        fill('c', renda, dedC, baseC, resC);
-        fill('s', renda, descS, baseS, resS);
+        fill('c', rendaTotal, dedC, baseC, resC);
+        fill('s', rendaTotal, descS, baseS, resS);
 
-        // ATIVAÇÃO DOS RESULTADOS E DO ALERTA
         document.getElementById('sectionResultados').style.display = 'block';
         document.getElementById('alertaIsento').style.display = baseC <= 28559.70 ? 'block' : 'none';
         
